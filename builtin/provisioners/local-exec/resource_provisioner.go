@@ -58,7 +58,7 @@ func applyFn(ctx context.Context) error {
 	go copyOutput(o, pr, copyDoneCh)
 
 	// Setup the command
-	cmd := exec.Command(shell, flag, command)
+	cmd := exec.CommandContext(ctx, shell, flag, command)
 	output, _ := circbuf.NewBuffer(maxBufSize)
 	cmd.Stderr = io.MultiWriter(output, pw)
 	cmd.Stdout = io.MultiWriter(output, pw)
@@ -71,19 +71,7 @@ func applyFn(ctx context.Context) error {
 	// Start the command
 	err := cmd.Start()
 	if err == nil {
-		// Wait for the command to complete in a goroutine
-		doneCh := make(chan error, 1)
-		go func() {
-			doneCh <- cmd.Wait()
-		}()
-
-		// Wait for the command to finish or for us to be interrupted
-		select {
-		case err = <-doneCh:
-		case <-ctx.Done():
-			cmd.Process.Kill()
-			err = cmd.Wait()
-		}
+		err = cmd.Wait()
 	}
 
 	// Close the write-end of the pipe so that the goroutine mirroring output
