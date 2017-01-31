@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"os/exec"
 	"runtime"
 
@@ -62,6 +63,14 @@ func applyFn(ctx context.Context) error {
 	output, _ := circbuf.NewBuffer(maxBufSize)
 	cmd.Stderr = io.MultiWriter(output, pw)
 	cmd.Stdout = io.MultiWriter(output, pw)
+
+	log.SetFlags(log.Lmicroseconds)
+	log.Println("TESTING LOCAL EXEC")
+	go func() {
+		log.Println("WAITING FOR:", cmd)
+		<-ctx.Done()
+		log.Println("DONE!!!!!")
+	}()
 
 	// Output what we're about to run
 	o.Output(fmt.Sprintf(

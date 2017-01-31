@@ -54,7 +54,7 @@ func TestResourceProvider_stop(t *testing.T) {
 	select {
 	case <-doneCh:
 		t.Fatal("should not finish quickly")
-	case <-time.After(10 * time.Millisecond):
+	case <-time.After(50 * time.Millisecond):
 	}
 
 	// Stop it
@@ -62,7 +62,7 @@ func TestResourceProvider_stop(t *testing.T) {
 
 	select {
 	case <-doneCh:
-	case <-time.After(100 * time.Millisecond):
+	case <-time.After(10 * time.Second):
 		t.Fatal("should finish")
 	}
 }
